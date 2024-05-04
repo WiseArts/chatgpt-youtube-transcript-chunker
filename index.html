@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatGPT YouTube Transcript Chunker</title>
+  <style>
+    body {
+      align-items: center;
+      background-color: #f0f4f7;
+      display: flex;
+      flex-direction: column;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      justify-content: center;
+      margin: 0;
+      overflow-x: hidden;
+      padding: 0;
+    }
+
+    .container {
+      background-color: #fff;
+      border-radius: 0.5rem;
+      box-shadow: 0 0 0.625rem rgba(0, 0, 0, 0.1);
+      margin-bottom: 2rem;
+      max-width: 37.5rem;
+      padding: 1.25rem;
+      width: 100%;
+    }
+
+    h1 {
+      color: #d32b25;
+      margin-bottom: 1.25rem;
+      text-align: center;
+    }
+
+    textarea {
+      border: 0.0625rem solid #ccc;
+      border-radius: 0.25rem;
+      height: 9.375rem;
+      margin-bottom: 1.25rem;
+      padding: 0.625rem;
+      resize: none;
+      width: calc(100% - 1.25rem);
+    }
+
+    button {
+      background-color: #d32b25;
+      border: none;
+      border-radius: 0.25rem;
+      color: #fff;
+      cursor: pointer;
+      display: block;
+      margin: 0 auto;
+      padding: 0.625rem 1.25rem;
+    }
+
+    button:hover {
+      background-color: #9c0808;
+    }
+
+    button.ghost {
+      background-color: #fff;
+      border: 0.0625rem solid #d32b25;
+      color: #d32b25;
+    }
+
+    button.ghost:hover {
+      background-color: #d32b25;
+      color: #fff;
+    }
+
+    .copy-button {
+      margin: 0.3125rem;
+    }
+
+    .chunk-container {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 1.25rem;
+    }
+
+    .chunk {
+      background-color: #f9f9f9;
+      border: 0.0625rem solid #ccc;
+      border-radius: 0.25rem;
+      margin-bottom: 1.25rem;
+      padding: 1.25rem;
+    }
+
+    .checkmark {
+      font-size: 1.2rem;
+      padding-left: 0.3125rem;
+    }
+
+    #noticeContainer {
+      background-color: #4caf50;
+      border-radius: 0.25rem;
+      color: white;
+      left: 100%;
+      margin-bottom: 1.25rem;
+      opacity: 0;
+      padding: 0.625rem;
+      position: absolute;
+      text-align: center;
+      top: 1rem;
+      transform: translateX(0%);
+      transition: all 0.5s ease-in-out;
+      white-space: nowrap;
+    }
+
+    #noticeContainer.is-active {
+      opacity: 1;
+      transform: translateX(calc(-100% - 1rem));
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>ChatGPT YouTube Transcript Chunker</h1>
+    <div id="noticeContainer">Transcript chunk copied.</div>
+    <div id="inputContainer">
+      <textarea id="transcriptInput" placeholder="Paste your YouTube transcript here"></textarea>
+      <button onclick="processTranscript()">Process Transcript</button>
+    </div>
+    <div id="chunkContainer" class="chunk-container"></div>
+  </div>
+  <div id="startOver" style="display: none;">
+    <button class="ghost" onclick="window.location.reload()">Start Over</button>
+  </div>
+
+  <script>
+    function processTranscript() {
+      const transcript = document.getElementById("transcriptInput").value.replace(/\n/g, ' ');
+      const noticeContainer = document.getElementById("noticeContainer");
+      const chunkSize = 3995;
+      let chunks = [];
+      let currentIndex = 0;
+      while (currentIndex < transcript.length) {
+        var chunk = transcript.substring(currentIndex, currentIndex + chunkSize);
+
+        if (chunk.length === 0) {
+          chunk = transcript.substring(currentIndex, currentIndex + chunkSize);
+        }
+        chunks.push("Remember the following part of a video transcript. More is coming. Only answer \"ok\" when you're done." + chunk);
+        currentIndex += chunk.length;
+      }
+      chunks.forEach((chunk, index) => {
+        var copyButton = document.createElement("button");
+        copyButton.textContent = "Copy Part " + (index + 1);
+        copyButton.classList.add("copy-button");
+        copyButton.onclick = function () {
+          copyToClipboard(chunk, copyButton);
+        };
+        chunkContainer.appendChild(copyButton);
+      });
+      inputContainer.style.display = "none";
+      startOver.style.display = "block";
+    }
+
+    function copyToClipboard(text, button) {
+      navigator.clipboard.writeText(text)
+        .then(() => {
+          if (!button.innerHTML.includes('checkmark')) {
+            button.innerHTML += ' <span class="checkmark">✔</span>';
+          }
+          showNotice(); // show the notice
+        })
+        .catch(err => {
+          console.error('Error copying text: ', err);
+        });
+    }
+
+    function showNotice() {
+      noticeContainer.classList.add('is-active');
+      setTimeout(function () {
+        noticeContainer.classList.remove('is-active');
+      }, 2000);
+    }
+  </script>
+</body>
+
+</html>
